@@ -1,0 +1,11 @@
+name,email,username,designation,department,qualification,phone,address,dateOfJoining,subjects
+Amit Sharma,amit.sharma@example.com,Amit1@,Assistant Professor,BCA,MCA,9876543210,"123 MG Road, Agra",2025-07-01,"[{""subjectName"":""DS"",""course"":""BCA"",""semester"":""3""}]"
+Neha Verma,neha.verma@example.com,Neha2#,Professor,BBA,MBA,9876543211,"45 Civil Lines, Agra",2024-06-15,"[{""subjectName"":""Marketing"",""course"":""BBA"",""semester"":""3""}]"
+Rohit Singh,rohit.singh@example.com,Rohit3$,Lecturer,B.Tech,M.Tech,9876543212,"78 MG Road, Agra",2023-08-10,"[{""subjectName"":""Computer Networks"",""course"":""B.Tech"",""semester"":""5""}]"
+Priya Gupta,priya.gupta@example.com,Priya4#,Assistant Professor,BCA,MCA,9876543213,"12 Station Road, Agra",2025-01-20,"[{""subjectName"":""Java"",""course"":""BCA"",""semester"":""5""}]"
+Vikram Jain,vikram.jain@example.com,Vikram5@,Associate Professor,BBA,MBA,9876543214,"34 MG Road, Agra",2022-09-05,"[{""subjectName"":""Finance"",""course"":""BBA"",""semester"":""5""}]"
+Sonal Mehta,sonal.mehta@example.com,Sonal6#,Professor,B.Tech,M.Tech,9876543215,"56 Civil Lines, Agra",2023-03-11,"[{""subjectName"":""AI"",""course"":""B.Tech"",""semester"":""7""}]"
+Rahul Yadav,rahul.yadav@example.com,Rahul7$,Lecturer,BCA,MCA,9876543216,"78 Station Road, Agra",2024-05-18,"[{""subjectName"":""Python"",""course"":""BCA"",""semester"":""5""}]"
+Anita Kapoor,anita.kapoor@example.com,Anita8@,Assistant Professor,BBA,MBA,9876543217,"90 MG Road, Agra",2025-02-25,"[{""subjectName"":""HR"",""course"":""BBA"",""semester"":""3""}]"
+Manish Rathi,manish.rathi@example.com,Manish9#,Professor,B.Tech,M.Tech,9876543218,"23 Civil Lines, Agra",2023-07-30,"[{""subjectName"":""Data Structures"",""course"":""B.Tech"",""semester"":""5""}]"
+Ritika Singh,ritika.singh@example.com,Ritika10$,Lecturer,BCA,MCA,9876543219,"11 Station Road, Agra",2024-11-12,"[{""subjectName"":""Web Dev"",""course"":""BCA"",""semester"":""3""}]"
