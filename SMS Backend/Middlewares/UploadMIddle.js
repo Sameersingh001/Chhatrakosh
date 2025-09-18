@@ -4,7 +4,7 @@ import fs from "fs";
 
 // Configure dynamic storage
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => { 
+  destination: (req, file, cb) => {
     let folder = "uploads/others"; // default
     // Choose folder based on route or request
     if (req.originalUrl.includes("/student")) folder = "uploads/student";
@@ -18,8 +18,33 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    cb(null, Date.now() + "-" + file.fieldname + ext); // unique name
-  }
+
+    // Give each upload a unique name (e.g. userId + timestamp)
+    const userId = req.body.userId || "common"; 
+    const newFileName = `${userId}-${Date.now()}${ext}`;
+
+    // Remove old image if exists in same folder
+    const folder =
+      req.originalUrl.includes("/student")
+        ? "uploads/student"
+        : req.originalUrl.includes("/teacher")
+        ? "uploads/teacher"
+        : req.originalUrl.includes("/admin")
+        ? "uploads/admin"
+        : "uploads/others";
+
+    fs.readdir(folder, (err, files) => {
+      if (!err) {
+        files.forEach((file) => {
+          if (file.startsWith(userId) && file !== newFileName) {
+            fs.unlinkSync(path.join(folder, file)); // delete old image
+          }
+        });
+      }
+    });
+
+    cb(null, newFileName);
+  },
 });
 
 // File filter (only images allowed)
@@ -29,7 +54,11 @@ const fileFilter = (req, file, cb) => {
   if (allowedTypes.test(ext)) {
     cb(null, true);
   } else {
-    cb(new Error("❌ Only image files are allowed (jpeg, jpg, png, gif, webp, bmp, svg)!"));
+    cb(
+      new Error(
+        "❌ Only image files are allowed (jpeg, jpg, png, gif, webp, bmp, svg)!"
+      )
+    );
   }
 };
 
@@ -37,7 +66,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
-  fileFilter
+  fileFilter,
 });
 
 export default upload;

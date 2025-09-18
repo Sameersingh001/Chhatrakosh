@@ -10,6 +10,7 @@ import TeacherProfile from './TeacherProfile';
 import StudentsPage from '../../StudentPages/AllStudent';
 import StudentDeatailPage from "../../StudentPages/StudentByID"
 import TeacherLeavesPage from './StudentLeaves';
+import TeacherNoticePage from './TeacherNoticePage';
 const Dashboard = () => {
 
   const [teacher, setTeacher] = useState(null);
@@ -57,8 +58,9 @@ useEffect(() => {
           <Route path='new-student' element={<AddStudent />}></Route>
           <Route path='profile' element={<TeacherProfile teacher={teacher} />}></Route>
           <Route path='all-Students' element={<StudentsPage role={teacher?.role} />}></Route>
-          <Route path='/AllStudents/:id' element={<StudentDeatailPage role={"teacher"} />}></Route>
-          <Route path='/student-leaves' element={<TeacherLeavesPage />}></Route>
+          <Route path='AllStudents/:id' element={<StudentDeatailPage role={"teacher"} />}></Route>
+          <Route path='student-leaves' element={<TeacherLeavesPage />}></Route>
+          <Route path='notice' element={<TeacherNoticePage teacher={teacher} />}></Route>
         </Routes>
 
 

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom";
 import CountUp from "react-countup";
-import { Users, BookOpen, ClipboardList, FileMinus, MessageSquare } from "lucide-react";
+import { Users, BookOpen, FileMinus, MessageSquare, Megaphone } from "lucide-react";
 
 // StatCard component
 const StatCard = ({ icon: Icon, title, value, color }) => (
@@ -25,15 +25,16 @@ export default function StudentDashboard({ studentData }) {
   const [stats, setStats] = useState({
     myClasses: 0,
     homeworkAssigned: 0,
-    homeworkSubmitted: 0,
     leaveRequests: 0,
     complaints: 0,
+    digitalNotices: 0,
   });
 
   const [reports, setReports] = useState({
     recentHomework: [],
     recentLeaves: [],
     recentComplaints: [],
+    recentNotices: [],
   });
 
   useEffect(() => {
@@ -41,29 +42,32 @@ export default function StudentDashboard({ studentData }) {
       if (!studentData?._id) return;
 
       try {
-
-         // Leaves
+        // Leaves
         const leavesRes = await axios.get(`/api/student/${studentData._id}/my-leaves`);
-        console.log(studentData)
         setStats((p) => ({ ...p, leaveRequests: leavesRes.data.leaves?.length || 0 }));
         setReports((p) => ({
           ...p,
           recentLeaves: leavesRes.data.leaves?.slice(0, 5) || [],
         }));
 
-        // Homework
+                // Digital Notices
+        const noticesRes = await axios.get("/api/student/notices");
+        setStats((p) => ({ ...p, digitalNotices: noticesRes.data.notices.length || 0 }));
+        setReports((p) => ({
+          ...p,
+          recentNotices: noticesRes.data.notices.slice(0, 5) || [],
+        }));
+
+        // Homework (only assigned, not submitted anymore)
         const homeworkRes = await axios.get("/api/student/homework");
         setStats((p) => ({
           ...p,
           homeworkAssigned: homeworkRes.data?.assigned || 0,
-          homeworkSubmitted: homeworkRes.data?.submitted || 0,
         }));
         setReports((p) => ({
           ...p,
           recentHomework: homeworkRes.data?.list?.slice(0, 5) || [],
         }));
-
-
 
         // Complaints
         const complaintsRes = await axios.get("/api/student/complaints");
@@ -72,6 +76,8 @@ export default function StudentDashboard({ studentData }) {
           ...p,
           recentComplaints: complaintsRes.data?.slice(0, 5) || [],
         }));
+
+
 
         setMessage("✅ Dashboard data loaded successfully");
       } catch (error) {
@@ -104,19 +110,11 @@ export default function StudentDashboard({ studentData }) {
           📊 Dashboard
         </button>
         <button
-          onClick={() => setActiveTab("homework")}
-          className={`px-4 py-2 rounded-lg font-medium ${
-            activeTab === "homework" ? "bg-indigo-500 text-white" : "bg-white shadow hover:bg-gray-100"
-          }`}
-        >
-          📝 Homework
-        </button>
-        <button
           onClick={() => setActiveTab("leaves")}
           className={`px-4 py-2 rounded-lg cursor-pointer font-medium ${
             activeTab === "leaves" ? "bg-indigo-500 text-white" : "bg-white shadow hover:bg-gray-100"
           }`}
-          >
+        >
           ✈️ Leaves
         </button>
         <button
@@ -127,6 +125,14 @@ export default function StudentDashboard({ studentData }) {
         >
           📢 Complaints
         </button>
+        <button
+          onClick={() => setActiveTab("notices")}
+          className={`px-4 py-2 rounded-lg font-medium ${
+            activeTab === "notices" ? "bg-indigo-500 text-white" : "bg-white shadow hover:bg-gray-100"
+          }`}
+        >
+          📜 Digital Notices
+        </button>
       </div>
 
       <div className="p-6">
@@ -135,24 +141,19 @@ export default function StudentDashboard({ studentData }) {
         {/* Dashboard Stats */}
         {activeTab === "dashboard" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <StatCard icon={Users} title="My Classes" value={stats.myClasses} color="bg-blue-500" />
+            <StatCard icon={Users} title="My Class Students" value={stats.myClasses} color="bg-blue-500" />
             <StatCard icon={BookOpen} title="Homework Assigned" value={stats.homeworkAssigned} color="bg-purple-500" />
-            <StatCard icon={ClipboardList} title="Homework Submitted" value={stats.homeworkSubmitted} color="bg-green-500" />
-            <Link to="/student/dashboard/request-leaves"><StatCard icon={FileMinus} title="Leave Requests" value={stats.leaveRequests} color="bg-indigo-500" /></Link>
+            <Link to="/student/dashboard/request-leaves">
+              <StatCard icon={FileMinus} title="Leave Requests" value={stats.leaveRequests} color="bg-indigo-500" />
+            </Link>
             <StatCard icon={MessageSquare} title="Complaints" value={stats.complaints} color="bg-pink-500" />
+            <Link to="/student/dashboard/digital-notice">
+            <StatCard icon={Megaphone} title="Digital Notices" value={stats.digitalNotices} color="bg-yellow-500" />
+            </Link>
           </div>
         )}
 
-        {/* Homework / Leaves / Complaints Tables */}
-        {activeTab === "homework" && (
-          <ReportTable
-            title="Recent Homework"
-            data={reports.recentHomework}
-            columns={["Title", "Deadline", "Status"]}
-            rowKeys={["title", "deadline", "status"]}
-            emptyMsg="No homework found"
-          />
-        )}
+        {/* Leaves */}
         {activeTab === "leaves" && (
           <ReportTable
             title="Recent Leaves"
@@ -162,6 +163,8 @@ export default function StudentDashboard({ studentData }) {
             emptyMsg="No leaves found"
           />
         )}
+
+        {/* Complaints */}
         {activeTab === "complaints" && (
           <ReportTable
             title="Recent Complaints"
@@ -170,6 +173,17 @@ export default function StudentDashboard({ studentData }) {
             rowKeys={["title", "date", "status"]}
             emptyMsg="No complaints found"
           />
+        )}
+
+        {/* Digital Notices */}
+        {activeTab === "notices" && (
+          <ReportTable
+            title="Recent Digital Notices"
+            data={reports.recentNotices}
+            columns={["Title", "Date", "Posted By"]}
+            rowKeys={["title", "date", "role"]}
+            emptyMsg="No notices found"
+            />
         )}
       </div>
     </main>
@@ -194,13 +208,24 @@ const ReportTable = ({ title, data, columns, rowKeys, emptyMsg }) => (
             data.map((row, idx) => (
               <tr key={idx} className="border-b last:border-0">
                 {rowKeys.map((key) => (
-                  <td key={key} className="p-2 break-words">{row[key]}</td>
+                  <td key={key} className="p-2 break-words">
+                    {/* Check if the key is 'date' and format it */}
+                    {key === "date"
+                      ? new Date(row[key]).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : row[key]}
+                  </td>
                 ))}
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={columns.length} className="p-2 text-center text-gray-500">{emptyMsg}</td>
+              <td colSpan={columns.length} className="p-2 text-center text-gray-500">
+                {emptyMsg}
+              </td>
             </tr>
           )}
         </tbody>

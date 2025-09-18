@@ -10,6 +10,7 @@ import {
   LogOut,
   MessageSquareWarning, // for complaint
   FileText, // for leave
+  Megaphone, // for digital notice
 } from "lucide-react";
 
 import { Link } from "react-router-dom";
@@ -31,7 +32,7 @@ export default function StudentMenu() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const StudentID = localStorage.getItem("SMS_studentId")
+    const StudentID = localStorage.getItem("SMS_studentId");
 
     const confirmLogout = window.confirm("Are you sure you want to log out?");
     if (!confirmLogout) return;
@@ -42,7 +43,10 @@ export default function StudentMenu() {
       alert("✅ You have been logged out.");
       window.location.href = "/student/login";
     } catch (error) {
-      alert(error.response?.data?.message || "❌ Error during logout. Please try again.");
+      alert(
+        error.response?.data?.message ||
+          "❌ Error during logout. Please try again."
+      );
     }
   };
 
@@ -64,8 +68,8 @@ export default function StudentMenu() {
         <Link to="/student/dashboard">
           <SidebarLink icon={LayoutDashboard} label="Dashboard" active />
         </Link>
-        <Link to="/student/classes">
-          <SidebarLink icon={Users} label="My Classes" />
+        <Link to="/student/dashboard/my-class-students">
+          <SidebarLink icon={Users} label="My Class" />
         </Link>
         <Link to="/student/attendance">
           <SidebarLink icon={CalendarDays} label="Attendance" />
@@ -78,6 +82,9 @@ export default function StudentMenu() {
         </Link>
         <Link to="/student/complaint">
           <SidebarLink icon={MessageSquareWarning} label="Complaint" />
+        </Link>
+        <Link to="/student/dashboard/digital-notice">
+          <SidebarLink icon={Megaphone} label="Digital Notice" />
         </Link>
         <Link to="/student/settings">
           <SidebarLink icon={Settings} label="Settings" />

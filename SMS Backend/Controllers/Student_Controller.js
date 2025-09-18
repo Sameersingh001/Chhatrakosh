@@ -1,6 +1,6 @@
 import StudentDB from "../Models/Student/StudentDB.js";
 import LeavesDB from "../Models/Leaves/LeavesDB.js";
-import TeacherDB from "../Models/Teacher/TeacherDB.js"
+import NoticeDB from "../Models/Notice/NoticeDB.js";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
@@ -314,6 +314,57 @@ async function GetStudentLeaves(req, res) {
 
 
 
+async function GetNotices(req, res) {
+  try {
+    const Notices = await NoticeDB.find().sort({ createdAt: -1 }); // latest first
+
+    if (Notices.length === 0) {
+      return res.status(404).json({ message: "No notices found" });
+    }
+
+    return res.status(200).json({
+      notices: Notices,
+      message: "✅ Notices fetched successfully",
+    });
+  } catch (err) {
+    console.error("❌ Error fetching notices:", err);
+    return res.status(500).json({ message: "Server error, please try again" });
+  }
+}
+
+
+
+async function MyClassStudents(req, res) {
+  const { id, className } = req.params;
+  // Check if id is provided and valid
+  if (!id || !className) {
+    return res.status(400).json({ message: "Student ID and className are required." });
+  }
+
+  try {
+    // Ensure id is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid student ID." });
+    }
+    // Fetch classmates except the current student
+    const students = await StudentDB.find({
+      className: className,
+      _id: { $ne: id }
+    }).select("-password"); // exclude sensitive fields
+
+    if (!students || students.length === 0) {
+      return res.status(404).json({ message: "No other students found in this class." });
+    }
+
+    return res.status(200).json({ students, message: "Students fetched successfully." });
+  } catch (err) {
+    console.error("Error fetching class students:", err);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+}
+
+
+
 
 
 async function StudentLogout(req, res) {
@@ -332,5 +383,7 @@ export default {
   UpdateStudent,
   RequestLeave,
   GetStudentLeaves,
-  bulkRegisterStudents
+  bulkRegisterStudents,
+  GetNotices,
+  MyClassStudents
 }

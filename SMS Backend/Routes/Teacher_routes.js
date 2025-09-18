@@ -9,6 +9,15 @@ const Teacherrouter = express.Router()
 
 Teacherrouter.get("/api/teacher/students",TeacherVerifyToken, TeacherController.getStudentsForTeacher)
 //Post Requests
+
+
+Teacherrouter.post("/api/teacher/notices", TeacherVerifyToken, TeacherController.createNotice)
+Teacherrouter.post("/api/teacher/notice/update/:id", TeacherVerifyToken, TeacherController.updateTeacherNotice)
+Teacherrouter.post("/api/teacher/notice/delete/:id", TeacherVerifyToken, TeacherController.deleteTeacherNotice)
+Teacherrouter.get("/api/teacher/notices", TeacherVerifyToken, TeacherController.getNotices)
+
+
+
 Teacherrouter.post("/api/teachers/register", AdminVerifyToken, TeacherController.RegisterTeacher)
 Teacherrouter.post("/api/teachers/bulk-register", AdminVerifyToken, TeacherController.BulkRegisterTeachers)
 Teacherrouter.post('/api/teacher/logout',TeacherVerifyToken, TeacherController.TeacherLogout)

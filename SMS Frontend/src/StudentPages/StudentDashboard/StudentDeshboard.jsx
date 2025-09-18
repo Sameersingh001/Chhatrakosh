@@ -7,6 +7,8 @@ import StudentMenu from './StudenMenu';
 import StudentDashboard from './DeshboardStudentData';
 import StudentProfile from './StudentProfile';
 import StudentLeavePage from './StudentLeaveForm';
+import StudentNoticePage from './StudentNoticePage';
+import ClassmatesPage from './MyClass';
 
 const StudentDeshboard = () => {
 
@@ -35,7 +37,7 @@ useEffect(() => {
     }
   } 
   fetchAdminData();
-}, []);
+}, []); 
 
   return (
     <>
@@ -55,6 +57,8 @@ useEffect(() => {
 
         <Route path="profile" element={<StudentProfile student={student} />} />
         <Route path='request-leaves' element={<StudentLeavePage student={student} />}></Route>
+        <Route path='digital-notice' element={<StudentNoticePage/>}></Route>
+        <Route path='my-class-students' element={<ClassmatesPage student={student}/>}></Route>
         
 
 

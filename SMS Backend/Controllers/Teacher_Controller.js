@@ -1,6 +1,7 @@
 import TeacherDB from "../Models/Teacher/TeacherDB.js";
 import StudentDB from "../Models/Student/StudentDB.js";
 import LeavesDB from "../Models/Leaves/LeavesDB.js"
+import NoticeDB from "../Models/Notice/NoticeDB.js"
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -364,6 +365,77 @@ async function UpdateStudentLeaveStatus(req ,res) {
 
 
 
+const getNotices = async (req, res) => {
+  try {
+    const notices = await NoticeDB.find().sort({ createdAt: -1 });
+    res.status(200).json(notices);
+  } catch (err) {
+    res.status(500).json({ error: "Server error while fetching notices" });
+  }
+};
+
+// Create a new notice
+const createNotice = async (req, res) => {
+  try {
+    const { title, description, link } = req.body;
+
+    if (!req.user || (req.user.role !== "teacher" && req.user.role !== "admin")) {
+      return res.status(403).json({ error: "Only teachers or admins can create notices" });
+    }
+
+    const newNotice = new NoticeDB({
+      title,
+      description,
+      link,
+      role: req.user.role,
+    });
+
+    await newNotice.save();
+    res.status(201).json(newNotice);
+  } catch (err) {
+    res.status(500).json({ error: "Server error while creating notice" });
+  }
+};
+
+
+const updateTeacherNotice = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // find only if notice is teacher's
+    const notice = await NoticeDB.findOne({ _id: id, role: "teacher" });
+    if (!notice) {
+      return res.status(403).json({ error: "❌ You can only update your own notices" });
+    }
+
+    const updatedNotice = await NoticeDB.findByIdAndUpdate(id, req.body, { new: true });
+    res.status(200).json({ message: "✅ Notice updated", notice: updatedNotice });
+  } catch (err) {
+    console.error("❌ Error updating notice:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+
+ const deleteTeacherNotice = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // only teacher-created notices can be deleted
+    const notice = await NoticeDB.findOne({ _id: id, role: "teacher" });
+    if (!notice) {
+      return res.status(403).json({ error: "❌ You can only delete your own notices" });
+    }
+
+    await NoticeDB.findByIdAndDelete(id);
+    res.status(200).json({ message: "✅ Notice deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting notice:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 
 
 async function TeacherLogout(req, res) {
@@ -385,5 +457,10 @@ export default {
     getStudentsForTeacher,
     getLeavesForTeacher,
     UpdateStudentLeaveStatus,
-    BulkRegisterTeachers
+    BulkRegisterTeachers,
+    createNotice,
+    getNotices,
+    deleteTeacherNotice,
+    updateTeacherNotice
+    
 }

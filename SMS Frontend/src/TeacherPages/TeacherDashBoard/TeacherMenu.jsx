@@ -79,11 +79,8 @@ export default function TeacherMenu() {
         <Link to="/teacher/classes">
           <SidebarLink icon={GraduationCap} label="Classes" />
         </Link>
-        <Link to="/teacher/notice">
-          <SidebarLink icon={Bell} label="Notice" />
-        </Link>
-        <Link to="/teacher/teacher-notice">
-          <SidebarLink icon={FilePlus2} label="Teacher Notice" />
+        <Link to="/teacher/dashboard/notice">
+          <SidebarLink icon={Bell} label="All Notice" />
         </Link>
         <Link to="/teacher/complaints">
           <SidebarLink icon={AlertCircle} label="Complaints" />
