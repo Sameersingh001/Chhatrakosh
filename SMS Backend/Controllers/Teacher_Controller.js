@@ -257,6 +257,55 @@ async function Teacherlogin(req, res) {
 }
 
 
+ const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const teacherId = req.params.id;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "New password and confirm password do not match" });
+    }
+
+    // find teacher
+    const teacher = await TeacherDB.findById(teacherId);
+    if (!teacher) {
+      return res.status(404).json({ message: "Teacher not found" });
+    }
+
+    // check current password
+    const isMatch = await bcrypt.compare(currentPassword, teacher.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    // validate password rules (optional but good practice)
+    const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!strongPassword.test(newPassword)) {
+      return res.status(400).json({
+        message:
+          "Password must be at least 8 chars long and include uppercase, lowercase, number, and special character",
+      });
+    }
+
+    // hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    teacher.password = hashedPassword;
+    await teacher.save();
+
+    return res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("Error in changePassword:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+
 
 async function GetTeacher(req, res) {
     const TeacherID = req.params.id;
@@ -278,8 +327,14 @@ async function getStudentsForTeacher(req, res) {
       return res.status(404).json({ message: "Teacher not found" });
     }
 
+    // Build all possible classNames from teacher's subjects
+    const classNames = teacher.subjects.map(
+      (subj) => `${subj.course.trim()}`
+    );
+
+    // Find students whose className matches any of those
     const students = await StudentDB.find({
-      className: { $regex: new RegExp(`^${teacher.department.trim()}$`, "i") }
+      className: { $in: classNames }
     });
 
     res.status(200).json(students);
@@ -287,7 +342,6 @@ async function getStudentsForTeacher(req, res) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 }
-
 
 
 
@@ -461,6 +515,7 @@ export default {
     createNotice,
     getNotices,
     deleteTeacherNotice,
-    updateTeacherNotice
+    updateTeacherNotice,
+    changePassword
     
 }

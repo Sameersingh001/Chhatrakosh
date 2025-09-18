@@ -8,9 +8,16 @@ const studentrouter = express.Router()
 
 
 studentrouter.get("/api/students/:id", StudentVerifyToken, Student_Controller.GetStudent)
+studentrouter.post("/api/student/leave/:leaveId",StudentVerifyToken, Student_Controller.DeleteLeaves)
 studentrouter.get("/api/student/:id/my-leaves", StudentVerifyToken, Student_Controller.GetStudentLeaves)
 studentrouter.get("/api/student/notices", StudentVerifyToken, Student_Controller.GetNotices)
 studentrouter.get("/api/students/class/:className/:id", StudentVerifyToken, Student_Controller.MyClassStudents)
+
+
+
+//change password route
+
+studentrouter.post("/api/student/:id/changePassword", StudentVerifyToken, Student_Controller.changePassword)
 
 studentrouter.post("/api/student/request-leaves", StudentVerifyToken, Student_Controller.RequestLeave )
 

@@ -11,6 +11,7 @@ import {
   LogOut,
   Building,
   BellRing,
+  MessageSquareWarning, // ✅ new icon for complaints
 } from "lucide-react";
 
 import { Link } from "react-router-dom";
@@ -99,6 +100,13 @@ export default function SMSNav() {
         <Link to="/admin/dashboard/digital-notice">
           <SidebarLink icon={BellRing} label="Digital Notice" />
         </Link>
+
+        {/* ✅ Student Complaints */}
+        <Link to="/admin/dashboard/complaints">
+          <SidebarLink icon={MessageSquareWarning} label="Complaints" />
+        </Link>
+
+        {/* Settings */}
         <Link to="/admin/settings">
           <SidebarLink icon={Settings} label="Settings" />
         </Link>

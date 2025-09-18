@@ -7,7 +7,6 @@ import upload from '../Middlewares/UploadMIddle.js'
 const Teacherrouter = express.Router()
 
 
-Teacherrouter.get("/api/teacher/students",TeacherVerifyToken, TeacherController.getStudentsForTeacher)
 //Post Requests
 
 
@@ -15,7 +14,10 @@ Teacherrouter.post("/api/teacher/notices", TeacherVerifyToken, TeacherController
 Teacherrouter.post("/api/teacher/notice/update/:id", TeacherVerifyToken, TeacherController.updateTeacherNotice)
 Teacherrouter.post("/api/teacher/notice/delete/:id", TeacherVerifyToken, TeacherController.deleteTeacherNotice)
 Teacherrouter.get("/api/teacher/notices", TeacherVerifyToken, TeacherController.getNotices)
+Teacherrouter.get("/api/teacher/students",TeacherVerifyToken, TeacherController.getStudentsForTeacher)
 
+//change password route
+Teacherrouter.post("/api/teacher/:id/changePassword", TeacherVerifyToken, TeacherController.changePassword)
 
 
 Teacherrouter.post("/api/teachers/register", AdminVerifyToken, TeacherController.RegisterTeacher)

@@ -8,6 +8,21 @@ import {
   Calendar,
   ClipboardList,
 } from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  LineChart,
+  Line,
+} from "recharts";
 
 const StatCard = ({ icon: Icon, title, value, color }) => (
   <div className="bg-white shadow rounded-2xl p-6 flex items-center gap-4 hover:shadow-lg transition">
@@ -38,17 +53,19 @@ export default function TeacherDashboard() {
     recentAttendance: [],
   });
 
+  const COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444"];
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1️⃣ Students
-        const studentsRes = await axios.get("/api/teacher/students", {withCredentials: true});
+        const studentsRes = await axios.get("/api/teacher/students", {
+          withCredentials: true,
+        });
         setStats((prev) => ({
           ...prev,
           studentsAssigned: studentsRes.data?.length || 0,
         }));
 
-        // 2️⃣ Homework
         const homeworkRes = await axios.get("/api/teacher/homework");
         setStats((prev) => ({
           ...prev,
@@ -60,7 +77,6 @@ export default function TeacherDashboard() {
           recentHomework: homeworkRes.data?.list?.slice(0, 5) || [],
         }));
 
-        // 3️⃣ Attendance
         const attendanceRes = await axios.get("/api/teacher/attendance");
         setStats((prev) => ({
           ...prev,
@@ -80,6 +96,12 @@ export default function TeacherDashboard() {
 
     fetchData();
   }, []);
+
+  // 📊 Data for Pie Chart
+  const homeworkPieData = [
+    { name: "Given", value: stats.homeworkGiven },
+    { name: "Submitted", value: stats.homeworkSubmitted },
+  ];
 
   return (
     <main className="flex-1 p-6 bg-gray-50">
@@ -118,19 +140,90 @@ export default function TeacherDashboard() {
         >
           📅 Attendance
         </button>
-
       </div>
 
-      {/* 🔹 Content */}
+      {/* 🔹 Dashboard Content */}
       {activeTab === "dashboard" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-         <Link to="/teacher/dashboard/all-students"><StatCard icon={Users} title="Students" value={stats.studentsAssigned} color="bg-blue-500" /></Link> 
-          <StatCard icon={BookOpen} title="Homework Given" value={stats.homeworkGiven} color="bg-purple-500" />
-          <StatCard icon={ClipboardList} title="Homework Submitted" value={stats.homeworkSubmitted} color="bg-green-500" />
-          <StatCard icon={Calendar} title="Attendance Taken" value={stats.attendanceTaken} color="bg-yellow-500" />
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <Link to="/teacher/dashboard/all-students">
+              <StatCard
+                icon={Users}
+                title="Students"
+                value={stats.studentsAssigned}
+                color="bg-blue-500"
+              />
+            </Link>
+            <StatCard
+              icon={BookOpen}
+              title="Homework Given"
+              value={stats.homeworkGiven}
+              color="bg-purple-500"
+            />
+            <StatCard
+              icon={ClipboardList}
+              title="Homework Submitted"
+              value={stats.homeworkSubmitted}
+              color="bg-green-500"
+            />
+            <StatCard
+              icon={Calendar}
+              title="Attendance Taken"
+              value={stats.attendanceTaken}
+              color="bg-yellow-500"
+            />
+          </div>
+
+          {/* 📈 Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Pie Chart - Homework Distribution */}
+            <div className="bg-white shadow rounded-2xl p-6">
+              <h2 className="text-lg font-bold mb-4">📝 Homework Distribution</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={homeworkPieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    fill="#8884d8"
+                    label
+                  >
+                    {homeworkPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Line Chart - Attendance Trend */}
+            <div className="bg-white shadow rounded-2xl p-6">
+              <h2 className="text-lg font-bold mb-4">📅 Attendance Trend</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart
+                  data={reports.recentAttendance}
+                  margin={{ top: 10, right: 20, bottom: 20, left: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="present" stroke="#10B981" />
+                  <Line type="monotone" dataKey="absent" stroke="#EF4444" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </>
       )}
 
+      {/* 🔹 Homework Tab */}
       {activeTab === "homework" && (
         <section>
           <h2 className="text-xl font-bold mb-4">📝 Recent Homework</h2>
@@ -165,6 +258,7 @@ export default function TeacherDashboard() {
         </section>
       )}
 
+      {/* 🔹 Attendance Tab */}
       {activeTab === "attendance" && (
         <section>
           <h2 className="text-xl font-bold mb-4">📅 Recent Attendance</h2>

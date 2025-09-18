@@ -204,6 +204,65 @@ async function StudentLogin(req, res) {
 
 
 
+
+//Change password Controller 
+
+
+
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const studentId = req.params.id;
+
+    // 1️⃣ Find student
+    const student = await StudentDB.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // 2️⃣ Compare current password
+    const isMatch = await bcrypt.compare(currentPassword, student.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    // 3️⃣ Check confirm password
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    // 4️⃣ Validate password strength (optional but recommended)
+    const strongPasswordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!strongPasswordRegex.test(newPassword)) {
+      return res.status(400).json({
+        message:
+          "Password must be at least 8 characters, include uppercase, lowercase, number, and special character",
+      });
+    }
+
+    // 5️⃣ Hash and save new password
+    const salt = await bcrypt.genSalt(10);
+    student.password = await bcrypt.hash(newPassword, salt);
+    await student.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
 async function GetStudent(req, res) {
   const StudentID = req.params.id;
   try {
@@ -312,6 +371,25 @@ async function GetStudentLeaves(req, res) {
   }
 }
 
+const DeleteLeaves = async (req, res) => {
+  const { leaveId } = req.params;
+
+  try {
+    const leave = await LeavesDB.findById(leaveId);
+    if (!leave) return res.status(404).json({ message: "Leave not found" });
+
+    // Only allow deletion if leave is still pending
+    if (leave.teacherStatus !== "Pending" || leave.adminStatus !== "Pending") {
+      return res.status(403).json({ message: "Cannot delete approved/recommended leave" });
+    }
+
+    await LeavesDB.findByIdAndDelete(leaveId);
+    res.status(200).json({ message: "Leave deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting leave:", err);
+    res.status(500).json({ message: "Error deleting leave" });
+  }
+};
 
 
 async function GetNotices(req, res) {
@@ -385,5 +463,7 @@ export default {
   GetStudentLeaves,
   bulkRegisterStudents,
   GetNotices,
-  MyClassStudents
+  MyClassStudents,
+  changePassword,
+  DeleteLeaves
 }
