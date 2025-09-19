@@ -222,51 +222,57 @@ const TeacherNoticePage = () => {
                     </p>
                 ) : (
                     filteredNotices.map((n) => (
-                        <div
-                            key={n._id}
-                            className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-xl transition border border-blue-100 relative hover:scale-105"
-                        >
-                            {/* Actions */}
-                            {n.role === "teacher" && (
-                                <div className="absolute bottom-5 right-3 flex gap-3">
-                                    <button
-                                        onClick={() => handleEdit(n)}
-                                        className="p-2 rounded-full hover:bg-yellow-100 text-yellow-600 shadow"
-                                        title="Edit Notice"
-                                    >
-                                        <Edit2 className="w-5 h-5" />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(n._id)}
-                                        className="p-2 rounded-full hover:bg-red-100 text-red-600 shadow"
-                                        title="Delete Notice"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            )}
+<div
+  key={n._id}
+  className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-xl transition border border-blue-100 relative hover:scale-105 max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl w-full break-words"
+>
+  {/* Actions */}
+  {n.role === "teacher" && (
+    <div className="absolute bottom-5 right-3 flex gap-3">
+      <button
+        onClick={() => handleEdit(n)}
+        className="p-2 rounded-full hover:bg-yellow-100 text-yellow-600 shadow"
+        title="Edit Notice"
+      >
+        <Edit2 className="w-5 h-5" />
+      </button>
+      <button
+        onClick={() => handleDelete(n._id)}
+        className="p-2 rounded-full hover:bg-red-100 text-red-600 shadow"
+        title="Delete Notice"
+      >
+        <Trash2 className="w-5 h-5" />
+      </button>
+    </div>
+  )}
 
-                            <div className="flex justify-between items-center mb-3">
-                                <h3 className="text-xl font-semibold text-blue-800">
-                                    {n.title}
-                                </h3>
-                                <span className="text-sm text-gray-500">
-                                    {new Date(n.date).toLocaleDateString()}
-                                </span>
-                            </div>
-                            <p className="text-gray-700 mb-3 text-lg">{n.description}</p>
-                            {n.link && (
-                                <a
-                                    href={n.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 underline text-sm font-medium"
-                                >
-                                    🔗 Open Link
-                                </a>
-                            )}
-                            <p className="text-xs text-gray-500 mt-2">Role: {n.role}</p>
-                        </div>
+  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 gap-2">
+    <h3 className="text-lg sm:text-xl font-semibold text-blue-800 leading-snug break-words">
+      {n.title}
+    </h3>
+    <span className="text-xs sm:text-sm text-gray-500">
+      {new Date(n.date).toLocaleDateString()}
+    </span>
+  </div>
+
+  <p className="text-gray-700 mb-3 text-base sm:text-lg leading-relaxed break-words whitespace-pre-line">
+    {n.description}
+  </p>
+
+  {n.link && (
+    <a
+      href={n.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 underline text-sm font-medium break-all"
+    >
+      🔗 Open Link
+    </a>
+  )}
+
+  <p className="text-xs text-gray-500 mt-2">Role: {n.role}</p>
+</div>
+
                     ))
                 )}
             </div>

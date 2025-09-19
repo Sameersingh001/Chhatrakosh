@@ -9,17 +9,32 @@ export default function AdminLogin() {
     confirmPassword: "",
   });
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Captcha states
+  const [captcha, setCaptcha] = useState("");
+  const [captchaInput, setCaptchaInput] = useState("");
+
+  useEffect(() => {
+    generateCaptcha(); // Generate captcha on first load
+  }, []);
 
   useEffect(() => {
     if (message) {
-      const timer = setTimeout(() => {
-        setMessage("");
-      }, 3000);
+      const timer = setTimeout(() => setMessage(""), 3000);
       return () => clearTimeout(timer);
     }
   }, [message]);
 
-  const [showPassword, setShowPassword] = useState(false);
+  const generateCaptcha = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setCaptcha(result);
+    setCaptchaInput("");
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,9 +43,16 @@ export default function AdminLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Confirm password check
+    // Password match check
     if (formData.password !== formData.confirmPassword) {
-      setMessage("Passwords do not match!");
+      setMessage("❌ Passwords do not match!");
+      return;
+    }
+
+    // Captcha check
+    if (captchaInput !== captcha) {
+      setMessage("❌ Incorrect captcha, try again.");
+      generateCaptcha();
       return;
     }
 
@@ -40,7 +62,6 @@ export default function AdminLogin() {
       });
       setMessage(response.data.message);
       localStorage.setItem("SMS_adminId", response.data.admin.id);
-
       window.location.href = "/admin/dashboard";
     } catch (error) {
       setMessage(error.response?.data?.message || "Error logging in");
@@ -69,14 +90,10 @@ export default function AdminLogin() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Username */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Username
-            </label>
+            <label className="block text-gray-700 font-medium mb-1">Username</label>
             <input
               type="text"
               name="username"
-              pattern="^[a-zA-Z0-9@!#$%^&*()_+\-=\[\]{};':\\|,.<>/?]{3,30}$"
-              title="Username must be 3–30 characters long and can include letters, numbers, and special characters like @, #, $, _, ., etc."
               placeholder="👤 Your Username"
               value={formData.username}
               onChange={handleChange}
@@ -87,9 +104,7 @@ export default function AdminLogin() {
 
           {/* Password */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Password
-            </label>
+            <label className="block text-gray-700 font-medium mb-1">Password</label>
             <input
               type={showPassword ? "text" : "password"}
               name="password"
@@ -97,17 +112,13 @@ export default function AdminLogin() {
               value={formData.password}
               onChange={handleChange}
               required
-              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-              title="Password must be at least 8 characters, include uppercase, lowercase, number, and special character."
               className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Confirm Password
-            </label>
+            <label className="block text-gray-700 font-medium mb-1">Confirm Password</label>
             <input
               type={showPassword ? "text" : "password"}
               name="confirmPassword"
@@ -119,7 +130,7 @@ export default function AdminLogin() {
             />
           </div>
 
-          {/* Show Password (moved below confirm password) */}
+          {/* Show Password */}
           <div className="flex items-center mt-2">
             <input
               type="checkbox"
@@ -132,6 +143,32 @@ export default function AdminLogin() {
             </label>
           </div>
 
+          {/* Captcha */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">
+              Enter Captcha:{" "}
+              <span className="ml-2 inline-block font-bold px-6 py-2 bg-indigo-100 text-indigo-800 rounded-lg tracking-widest select-all">
+                {captcha}
+              </span>
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={captchaInput}
+                onChange={(e) => setCaptchaInput(e.target.value)}
+                required
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button
+                type="button"
+                onClick={generateCaptcha}
+                className="px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+              >
+                ↻
+              </button>
+            </div>
+          </div>
+
           {/* Submit */}
           <button
             type="submit"
@@ -141,7 +178,6 @@ export default function AdminLogin() {
           </button>
         </form>
 
-        {/* Register Link */}
         <p className="mt-6 text-center text-gray-600 text-sm">
           Don’t have an account?{" "}
           <a

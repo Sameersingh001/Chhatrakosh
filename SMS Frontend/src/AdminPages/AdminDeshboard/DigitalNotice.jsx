@@ -198,21 +198,18 @@ const NoticePage = () => {
               placeholder="Optional: Add a Link (e.g., https://example.com)"
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
             />
-            <select
+            <input
               name="role"
               value={form.role}
+              readOnly
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-gray-50"
             >
-              <option value="admin">Admin</option>
-              <option value="teacher">Teacher</option>
-              <option value="student">Student</option>
-            </select> {/* Made role selectable for customization */}
+            </input>
             <button
               type="submit"
-              className={`px-6 py-3 rounded-full text-white shadow-lg hover:scale-105 transition ${
-                editingId ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-500 hover:bg-green-600"
-              }`}
+              className={`px-6 py-3 rounded-full text-white shadow-lg hover:scale-105 transition ${editingId ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-500 hover:bg-green-600"
+                }`}
             >
               {editingId ? "Update Notice" : "Submit Notice"}
             </button>
@@ -230,7 +227,7 @@ const NoticePage = () => {
           filteredNotices.map((n) => (
             <div
               key={n._id}
-              className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-xl transition border border-indigo-100 relative hover:scale-105"
+              className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-xl transition border border-blue-100 relative hover:scale-105 max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl w-full break-words"
             >
               {/* Actions */}
               <div className="absolute bottom-5 right-3 flex gap-3">
@@ -250,25 +247,33 @@ const NoticePage = () => {
                 </button>
               </div>
 
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-xl font-semibold text-indigo-800">{n.title}</h3>
-                <span className="text-sm text-gray-500">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 gap-2">
+                <h3 className="text-lg sm:text-xl font-semibold text-blue-800 leading-snug break-words">
+                  {n.title}
+                </h3>
+                <span className="text-xs sm:text-sm text-gray-500">
                   {new Date(n.date).toLocaleDateString()}
                 </span>
               </div>
-              <p className="text-gray-700 mb-3 text-lg">{n.description}</p> {/* Larger text */}
+
+              <p className="text-gray-700 mb-3 text-base sm:text-s leading-relaxed break-words whitespace-pre-line">
+                {n.description}
+              </p>
+
               {n.link && (
                 <a
                   href={n.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-indigo-600 underline text-sm font-medium"
+                  className="text-blue-600 underline text-sm font-medium break-all"
                 >
                   🔗 Open Link
                 </a>
               )}
+
               <p className="text-xs text-gray-500 mt-2">Role: {n.role}</p>
             </div>
+
           ))
         )}
       </div>

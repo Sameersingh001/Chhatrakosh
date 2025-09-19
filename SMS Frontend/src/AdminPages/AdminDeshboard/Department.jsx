@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Users, BookOpen, GraduationCap } from "lucide-react";
+import { Users, BookOpen, GraduationCap, Printer } from "lucide-react";
 
 export default function TeacherByDepartment() {
     const [department, setDepartment] = useState("");
@@ -84,14 +84,125 @@ export default function TeacherByDepartment() {
         }
     };
 
+    const handlePrint = () => {
+        const printWindow = window.open('', '_blank');
+        const printDate = new Date().toLocaleString();
+
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Teachers & Students Report - ${department}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    h1 { color: #333; text-align: center; }
+                    h2 { color: #444; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f5f5f5; }
+                    tr:nth-child(even) { background-color: #f9f9f9; }
+                    .print-date { text-align: right; color: #666; font-size: 14px; margin-bottom: 20px; }
+                    @media print {
+                        body { margin: 0; }
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>Teachers & Students Report - ${department}</h1>
+                <div class="print-date">Generated: ${printDate}</div>
+                
+                <h2>Teachers (${teachers.length})</h2>
+                ${teachers.length > 0 ? `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Subjects</th>
+                                <th>Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+${teachers.map(t => `
+  <tr>
+    <td>${t.name || t.fullName || "Unnamed"}</td>
+    <td>${t.email || "-"}</td>
+    <td>${t.department || "-"}</td>
+    <td>
+      ${Array.isArray(t.subjects) && t.subjects.length > 0
+                ? t.subjects.map(sub => sub.subjectName).join(", ")
+                : "-"
+            }
+    </td>
+    <td>${t.phone || t.mobile || "—"}</td>
+  </tr>
+`).join('')}
+
+                        </tbody>
+                    </table>
+                ` : '<p>No teachers found</p>'}
+                
+                <h2>Students (${students.length})</h2>
+                ${students.length > 0 ? `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Roll No</th>
+                                <th>Class</th>
+                                <th>Email</th>
+                                <th>phone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${students.map(s => `
+                                <tr>
+                                    <td>${s.name || s.fullName || "Unnamed Student"}</td>
+                                    <td>${s.rollNo || "—"}</td>
+                                    <td>${s.className || "-"}, ${s.semester}</td>
+                                    <td>${s.email || "-"}</td>
+                                    <td>${s.phone || "-"}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                ` : '<p>No students found</p>'}
+                
+                <button class="no-print" onclick="window.print()" style="margin-top: 20px; padding: 10px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Print Report
+                </button>
+                <button class="no-print" onclick="window.close()" style="margin-top: 20px; margin-left: 10px; padding: 10px 15px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Close Window
+                </button>
+            </body>
+            </html>
+        `);
+
+        printWindow.document.close();
+    };
+
     const presets = validDepartments;
 
     return (
         <div className="p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-            <h1 className="text-3xl font-extrabold text-gray-800 mb-6 flex items-center gap-3">
-                <GraduationCap className="text-indigo-600" size={28} />
-                Teachers & Students by Department
-            </h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-extrabold text-gray-800 flex items-center gap-3">
+                    <GraduationCap className="text-indigo-600" size={28} />
+                    Teachers & Students by Department
+                </h1>
+
+                {(teachers.length > 0 || students.length > 0) && (
+                    <button
+                        onClick={handlePrint}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition"
+                    >
+                        <Printer size={18} />
+                        Print Report
+                    </button>
+                )}
+            </div>
 
             <form
                 onSubmit={handleSearch}
@@ -213,6 +324,15 @@ export default function TeacherByDepartment() {
                                     <p className="text-sm text-gray-600 mt-1">
                                         <strong>Department:</strong> {t.department || "-"}
                                     </p>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                        <strong>Subjects:</strong>{" "}
+                                        {Array.isArray(t.subjects)
+                                            ? t.subjects.map((sub) =>
+                                                typeof sub === "string" ? sub : sub.subjectName
+                                            ).join(", ")
+                                            : t.subject?.subjectName || "-"}
+                                    </p>
+
                                     <p className="text-sm text-gray-600">
                                         <strong>Phone:</strong> {t.phone || t.mobile || "—"}
                                     </p>
@@ -254,6 +374,7 @@ export default function TeacherByDepartment() {
                                     </p>
                                     <p className="text-sm text-gray-600">
                                         <strong>Class:</strong> {s.className || "-"}
+                                        <strong> Semester:</strong> {s.semester || "-"}
                                     </p>
                                     <p className="text-sm text-gray-600">{s.email || ""}</p>
                                 </div>
